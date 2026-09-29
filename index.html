@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pose Fighter</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <div class="hp-block">
+      <span class="hp-name">BẠN</span>
+      <div class="hp-bar"><div id="hp-player-fill" class="hp-fill player"></div></div>
+      <span id="hp-player-num" class="hp-num">1200</span>
+    </div>
+    <div id="cooldowns">
+      <div class="cd-slot" id="cd1"><span class="cd-key">1</span><span class="cd-name">Bắn</span></div>
+      <div class="cd-slot" id="cd2"><span class="cd-key">2</span><span class="cd-name">Cầu nổ</span></div>
+      <div class="cd-slot" id="cd3"><span class="cd-key">3</span><span class="cd-name">Khiên</span></div>
+    </div>
+    <div class="hp-block boss">
+      <span id="hp-boss-num" class="hp-num">1200</span>
+      <div class="hp-bar"><div id="hp-boss-fill" class="hp-fill boss"></div></div>
+      <span class="hp-name">BOSS</span>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <div id="webcam-wrap">
+      <div id="video-box">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="pose-canvas" width="640" height="480"></canvas>
+      </div>
+      <div id="pose-label">Camera: tắt</div>
+    </div>
+
+    <div id="banner" class="hidden"></div>
+
+    <div id="overlay">
+      <div id="overlay-main">
+        <h1 id="overlay-title">POSE FIGHTER</h1>
+        <p id="overlay-sub">Điều khiển bằng tư thế qua camera — chiến thắng boss!</p>
+        <div id="overlay-actions">
+          <button id="overlay-btn">BẮT ĐẦU</button>
+          <button id="overlay-btn2" class="btn-secondary hidden">QUAY LẠI TRANG CHỦ</button>
+          <button id="help-btn" class="btn-secondary">HƯỚN DẪN CHƠI</button>
+        </div>
+        <p id="overlay-hint">Tay trái = bắn · Tay phải = cầu nổ · Tay X = khiên · Đứng thẳng = di chuyển (↑↓←→)</p>
+      </div>
+
+      <div id="help-panel" class="hidden">
+        <h2>HƯỚN DẪN CHƠI</h2>
+        <div id="help-content">
+          <h3>MỤC TIÊU</h3>
+          <p>Hạ hết <b>1200 máu boss</b> trước khi bạn hết máu (bạn cũng có 1200). Boss thắng = bạn hết máu.</p>
+
+          <h3>ĐIỀU KHIỂN BẰNG TƯ THẾ (qua camera)</h3>
+          <ul>
+            <li><b>Giơ tay trái lên</b> → <b>Bắn</b> (100 sát thương, hồi chiêu 3 giây)</li>
+            <li><b>Giơ tay phải lên</b> → <b>Cầu nổ</b>: hiện hồng tâm trên boss, nổ sau 1 giây (150 sát thương, hồi chiêu 5 giây). Nổ còn bay mất đạn boss trong phạm vi!</li>
+            <li><b>Hai tay bắt chéo (tư thế X)</b> → <b>Khiên</b>: giảm 75% sát thương nhận vào</li>
+            <li><b>Đứng thẳng</b> → di chuyển bằng phím; khi đứng yên thật sự sẽ <b>hồi 5 máu/giây</b></li>
+          </ul>
+
+          <h3>ĐIỀU KHIỂN BẰNG PHÍM</h3>
+          <ul>
+            <li><b>← →</b> di chuyển, <b>↑</b> nhảy, <b>↓</b> ngồi</li>
+            <li>Phím chỉ hoạt động khi bạn đang ở <b>tư thế đứng thẳng</b></li>
+            <li><b>Nhảy = né đạn và chém của boss</b> (chém chỉ trúng khi bạn đứng trên mặt đất)</li>
+            <li><b>Ngom</b> cũng né được đạn bay ngang tầm</li>
+            <li>Không có camera? Dùng <b>1</b> = bắn, <b>2</b> = cầu nổ, <b>3</b> = giữ khiên</li>
+          </ul>
+
+          <h3>BOSS</h3>
+          <ul>
+            <li>Boss <b>di chuyển áp sát</b> bạn để chém, và bắn đạn từ xa</li>
+            <li>Boss thỉnh thoảng <b>dựng khiên</b> giảm sát thương — tranh thủ lúc khiên hạ mà đánh!</li>
+            <li>Bấm <b>R</b> để chơi lại sau khi thắng/thua</li>
+          </ul>
+        </div>
+        <button id="help-back" class="btn-secondary">QUAY LẠI</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script>
+  // tmPose 0.8 gọi tf.fromPixels (bị dời trong tfjs mới) → tự gắn lại
+  if (!tf.fromPixels && tf.browser && tf.browser.fromPixels) {
+    tf.fromPixels = tf.browser.fromPixels;
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+<script src="stretch.js"></script>
+</body>
+</html>
